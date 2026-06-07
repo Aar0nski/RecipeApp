@@ -1,0 +1,38 @@
+﻿@page "/create-recipe"
+@rendermode InteractiveServer              
+@using RecipeApp.Frontend.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Create Recipe</h3>
+
+<input @bind="recipe.Name" placeholder="Name" />
+<br />
+<br />
+
+<input @bind="recipe.Description" placeholder="Description" />
+<br />
+<br />
+
+<input @bind="recipe.CookingTime" type="number" placeholder="Cooking Time" />
+<br />
+<br />
+
+<input @bind="recipe.CategoryId" type="number" placeholder="Category Id" />
+<br />
+<br />
+
+<button @onclick="SaveRecipe">
+    Save
+</button>
+
+@code {
+    private CreateRecipeDto recipe = new();
+
+    private async Task SaveRecipe()
+    {
+        await Http.PostAsJsonAsync("api/Recipe", recipe);
+        Navigation.NavigateTo("/");
+    }
+}

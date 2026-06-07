@@ -1,0 +1,57 @@
+﻿@page "/"
+@using RecipeApp.Frontend.Models
+@rendermode InteractiveServer
+@inject HttpClient Http
+
+<h1>Recipes</h1>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p style="color:red">@errorMessage</p>
+}
+
+@if (recipes == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var recipe in recipes)
+        {
+            <li>
+                <strong>@recipe.Name</strong>
+                - @recipe.Description
+                (@recipe.CookingTime min)
+
+                <a href="edit-recipe/@recipe.Id">Edit</a>
+
+                <button @onclick="() => DeleteRecipe(recipe.Id)">
+                    Delete
+                </button>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<RecipeDto>? recipes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            recipes = await Http.GetFromJsonAsync<List<RecipeDto>>("api/Recipe");
+        }
+        catch
+        {
+            errorMessage = "Kunde inte hämta recept från API:t.";
+        }
+    }
+    private async Task DeleteRecipe(int id)
+    {
+        await Http.DeleteAsync($"api/Recipe/{id}");
+
+        recipes = await Http.GetFromJsonAsync<List<RecipeDto>>("api/Recipe");
+    }
+    private string? errorMessage;
+}
