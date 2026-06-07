@@ -1,0 +1,62 @@
+﻿@page "/edit-recipe/{id:int}"
+@rendermode InteractiveServer
+@using RecipeApp.Frontend.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Edit Recipe</h3>
+
+@if (recipe == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <input @bind="recipe.Name" />
+    <br />
+    <br />
+
+    <input @bind="recipe.Description" />
+    <br />
+    <br />
+
+    <input @bind="recipe.CookingTime" type="number" />
+    <br />
+    <br />
+
+    <input @bind="recipe.CategoryId" type="number" />
+    <br />
+    <br />
+
+    <button @onclick="UpdateRecipe">Save changes</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private CreateRecipeDto? recipe;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var existingRecipe = await Http.GetFromJsonAsync<RecipeDto>($"api/Recipe/{Id}");
+
+        if (existingRecipe != null)
+        {
+            recipe = new CreateRecipeDto
+            {
+                Name = existingRecipe.Name,
+                Description = existingRecipe.Description,
+                CookingTime = existingRecipe.CookingTime,
+                CategoryId = existingRecipe.CategoryId
+            };
+        }
+    }
+
+    private async Task UpdateRecipe()
+    {
+        await Http.PutAsJsonAsync($"api/Recipe/{Id}", recipe);
+        Navigation.NavigateTo("/");
+    }
+}

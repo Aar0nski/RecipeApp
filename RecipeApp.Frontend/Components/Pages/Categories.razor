@@ -1,0 +1,58 @@
+﻿@page "/categories"
+@rendermode InteractiveServer
+@using RecipeApp.Frontend.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<h3>Categories</h3>
+
+<input @bind="newCategory.Name" placeholder="Category name" />
+<button @onclick="CreateCategory">Add</button>
+
+@if (categories == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var category in categories)
+        {
+            <li>
+                @category.Name
+
+                <button @onclick="() => DeleteCategory(category.Id)">
+                    Delete
+                </button>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<CategoryDto>? categories;
+    private CreateCategoryDto newCategory = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        categories = await Http.GetFromJsonAsync<List<CategoryDto>>("api/Category");
+    }
+
+    private async Task CreateCategory()
+    {
+        await Http.PostAsJsonAsync("api/Category", newCategory);
+        newCategory = new CreateCategoryDto();
+        await LoadCategories();
+    }
+
+    private async Task DeleteCategory(int id)
+    {
+        await Http.DeleteAsync($"api/Category/{id}");
+        await LoadCategories();
+    }
+}
